@@ -1,108 +1,127 @@
-Here's the raw README text — just copy and paste:
-
-```
-# 🎬 Sentiment Analysis — Movie Reviews
-
-A machine learning project that predicts whether a movie review is **POSITIVE** or **NEGATIVE** using structured movie metadata and classical ML models.
-
 ---
 
-## 📂 Repository Structure
+## Setup
 
-```
-Sentiment_Analysis/
-│
-├── sentiment_analysis_code.ipynb   # Main notebook: EDA, preprocessing, modeling, evaluation
-├── movies.csv                      # Movie metadata (audienceScore, genre, runtimeMinutes, etc.)
-├── train.csv                       # Labeled training data
-└── test.csv                        # Test data for predictions
+Clone the repository and install all dependencies:
+```bash
+git clone https://github.com/Adithya-Sirigiri/Sentiment_Analysis.git
+cd Sentiment_Analysis
+pip install pandas numpy scikit-learn matplotlib seaborn jupyter
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## How to Run
 
-| Category        | Tools / Libraries                              |
-|-----------------|------------------------------------------------|
-| Language        | Python 3.13                                    |
-| Environment     | Jupyter Notebook (VS Code)                     |
-| Data Handling   | Pandas, NumPy                                  |
-| Visualization   | Matplotlib, Seaborn                            |
-| Modeling        | scikit-learn                                   |
-| Models Used     | Logistic Regression, Multinomial Naive Bayes, Linear SVC |
+Open `sentiment_analysis_code.ipynb` in VS Code or Jupyter and run all cells sequentially.
 
----
+The notebook is structured into the following sections:
 
-## 📊 Exploratory Data Analysis (EDA)
-
-- **Sentiment Distribution** — Imbalanced dataset: ~100K positive vs ~55K negative reviews
-- **Missing Values Analysis** — rating, ratingContents, boxOffice, distributor, soundType all >80% missing; title and audienceScore moderately missing
-- **Outlier Detection** — runtimeMinutes has significant outliers and was scaled accordingly
-- **Feature Correlation with Sentiment** — documentary and drama positively correlated; action and comedy lean negative
-- **Feature Distributions** — Histograms plotted for audienceScore, runtimeMinutes, and genre_W
+- **Importing Basic Libraries** — load all required packages
+- **EDA** — visualize distributions, missing values, outliers, and correlations
+- **Preprocessing** — clean, scale, and encode features
+- **Model Training** — train all three models on complete and split data
+- **Evaluation** — classification report, confusion matrix, precision-recall curve per model
+- **Hyperparameter Tuning** — tune each model for optimal performance
 
 ---
 
-## 🔄 Workflow
+## Exploratory Data Analysis
 
-1. **Data Loading** — Load and merge train.csv with movies.csv
-2. **EDA** — Visualize class distribution, missing values, outliers, and feature correlations
-3. **Preprocessing** — Handle missing values, scale runtimeMinutes, encode categorical features
-4. **Feature Engineering** — Build training_features matrix with audienceScore, runtimeMinutes, genre_W, and other features
-5. **Model Training** — Train three models with 5-fold StratifiedShuffleSplit cross-validation (scoring: f1_macro)
-6. **Evaluation** — Classification report, confusion matrix, and Precision-Recall curve per model
-7. **Hyperparameter Tuning** — Tuning performed for all three models
+The EDA phase examines the structure and quality of the merged dataset before modeling:
+
+- **Sentiment Distribution** — The dataset is imbalanced with approximately 100K positive reviews versus 55K negative reviews
+- **Missing Values** — Columns such as rating, ratingContents, boxOffice, distributor, and soundType have over 80% missing values; audienceScore and title have moderate missingness
+- **Outlier Detection** — Boxplots for audienceScore and runtimeMinutes showed that runtimeMinutes contains significant outliers and was scaled before training
+- **Feature Correlation with Sentiment** — Genre correlation analysis revealed that documentary and drama are positively associated with positive sentiment while action and comedy lean negative
+- **Feature Distributions** — Histograms plotted for audienceScore, runtimeMinutes, and genre_W to understand spread before feeding into models
 
 ---
 
-## 🤖 Models & Results
+## Preprocessing
 
-### Model 1 — Logistic Regression
-`LogisticRegression(max_iter=500, solver='saga', C=10000, tol=0.02, random_state=16)`
+All features are processed before model training:
 
-| Metric        | NEGATIVE | POSITIVE | Overall  |
-|---------------|----------|----------|----------|
-| Precision     | 0.78     | 0.86     | —        |
-| Recall        | 0.71     | 0.90     | —        |
-| F1-Score      | 0.74     | 0.88     | —        |
-| Accuracy      | —        | —        | 0.84     |
-| AP (PR Curve) | —        | —        | 0.95     |
+- Missing values handled through imputation or column dropping based on missingness threshold
+- `runtimeMinutes` scaled due to heavy outliers identified during EDA
+- Genre column one-hot encoded into binary indicator columns
+- `isFrequentReviewer` and `topDirector` flags engineered as additional features
+- Labels encoded using `LabelEncoder` for cross validation compatibility
+
+---
+
+## Models
+
+### Logistic Regression
+LinearSVC(max_iter=500, tol=0.005, C=0.2, random_state=16)
+Trained on the complete feature matrix. Cross validated using StratifiedShuffleSplit with 5 folds and f1_macro scoring.
+
+### Multinomial Naive Bayes
+MultinomialNB(alpha=0.25, force_alpha=True, fit_prior=True, class_prior=[0.42, 0.58])
+Class priors set to reflect the actual class imbalance in the training data.
+
+### Linear SVC
+LinearSVC(max_iter=500, tol=0.005, C=0.2, random_state=16)
+A linear support vector classifier tuned for fast convergence on large feature sets.
+
+---
+
+## Evaluation Strategy
+
+All models are evaluated on a held-out validation split using:
+
+- Classification Report (Precision, Recall, F1-Score per class)
+- Confusion Matrix
+- Precision-Recall Curve with Average Precision score
+- 5-fold Stratified cross validation with train and test scores
+
+---
+
+## Results
+
+### Logistic Regression
+
+| Metric        | NEGATIVE | POSITIVE | Overall |
+|---------------|----------|----------|---------|
+| Precision     | 0.78     | 0.86     | —       |
+| Recall        | 0.71     | 0.90     | —       |
+| F1-Score      | 0.74     | 0.88     | —       |
+| Accuracy      | —        | —        | 0.84    |
+| AP (PR Curve) | —        | —        | 0.95    |
 
 CV test scores: ~0.811–0.813 | Train scores: ~0.949–0.954
 
 ---
 
-### Model 2 — Multinomial Naive Bayes
-`MultinomialNB(alpha=0.25, force_alpha=True, fit_prior=True, class_prior=[0.42, 0.58])`
+### Multinomial Naive Bayes
 
-| Metric        | NEGATIVE | POSITIVE | Overall  |
-|---------------|----------|----------|----------|
-| Precision     | 0.73     | 0.87     | —        |
-| Recall        | 0.73     | 0.86     | —        |
-| F1-Score      | 0.73     | 0.86     | —        |
-| Accuracy      | —        | —        | 0.82     |
-| AP (PR Curve) | —        | —        | 0.94     |
+| Metric        | NEGATIVE | POSITIVE | Overall |
+|---------------|----------|----------|---------|
+| Precision     | 0.73     | 0.87     | —       |
+| Recall        | 0.73     | 0.86     | —       |
+| F1-Score      | 0.73     | 0.86     | —       |
+| Accuracy      | —        | —        | 0.82    |
+| AP (PR Curve) | —        | —        | 0.94    |
 
 CV test scores: ~0.797–0.799 | Train scores: ~0.896
 
 ---
 
-### Model 3 — Linear SVC
-`LinearSVC(max_iter=500, tol=0.005, C=0.2, random_state=16)`
+### Linear SVC
 
-| Metric        | NEGATIVE | POSITIVE | Overall  |
-|---------------|----------|----------|----------|
-| Precision     | 0.79     | 0.86     | —        |
-| Recall        | 0.70     | 0.91     | —        |
-| F1-Score      | 0.74     | 0.88     | —        |
-| Accuracy      | —        | —        | 0.84     |
-| AP (PR Curve) | —        | —        | 0.95     |
+| Metric        | NEGATIVE | POSITIVE | Overall |
+|---------------|----------|----------|---------|
+| Precision     | 0.79     | 0.86     | —       |
+| Recall        | 0.70     | 0.91     | —       |
+| F1-Score      | 0.74     | 0.88     | —       |
+| Accuracy      | —        | —        | 0.84    |
+| AP (PR Curve) | —        | —        | 0.95    |
 
 CV test scores: ~0.810–0.812 | Train scores: ~0.930–0.931
 
 ---
 
-## 🏆 Model Comparison Summary
+### Model Comparison
 
 | Model                   | Accuracy | AP Score | CV Test Score |
 |-------------------------|----------|----------|---------------|
@@ -110,35 +129,10 @@ CV test scores: ~0.810–0.812 | Train scores: ~0.930–0.931
 | Multinomial Naive Bayes | 0.82     | 0.94     | ~0.798        |
 | Linear SVC              | 0.84     | 0.95     | ~0.811        |
 
-> Logistic Regression and Linear SVC perform comparably and both outperform Naive Bayes.
+Logistic Regression and Linear SVC perform comparably and both outperform Naive Bayes across all metrics.
 
 ---
 
-## 🚀 Getting Started
+## Author
 
-### 1. Clone the repository
-
-```
-git clone https://github.com/Adithya-Sirigiri/Sentiment_Analysis.git
-cd Sentiment_Analysis
-```
-
-### 2. Install dependencies
-
-```
-pip install pandas numpy scikit-learn matplotlib seaborn jupyter
-```
-
-### 3. Launch the notebook
-
-```
-jupyter notebook sentiment_analysis_code.ipynb
-```
-
----
-
-## 👤 Author
-
-**Adithya Sirigiri**
-- GitHub: [@Adithya-Sirigiri](https://github.com/Adithya-Sirigiri)
-```
+Sirigiri Venkateswara Adithya
