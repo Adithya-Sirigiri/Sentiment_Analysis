@@ -1,3 +1,41 @@
+# Sentiment Analysis — Movie Reviews
+
+A machine learning pipeline for classifying movie reviews as positive or negative using structured metadata from Rotten Tomatoes. Three classical ML models are trained, evaluated, and compared using cross validation and standard classification metrics.
+
+---
+
+## Project Overview
+
+Predicting audience sentiment toward movies is a meaningful problem in the entertainment industry. This project builds an end to end pipeline that:
+
+- Merges review labels with movie metadata and performs thorough exploratory data analysis
+- Preprocesses features including missing value handling, outlier scaling, and genre encoding
+- Trains three models — Logistic Regression, Multinomial Naive Bayes, and Linear SVC — to classify sentiment
+- Evaluates each model using 5-fold Stratified cross validation, confusion matrices, and Precision-Recall curves
+- Performs hyperparameter tuning on all three models
+
+---
+
+## Dataset
+
+The dataset contains movie reviews merged with Rotten Tomatoes metadata. The following files are used:
+
+| File | Description |
+|------|-------------|
+| `train.csv` | Labeled reviews with sentiment (POSITIVE / NEGATIVE) used for training |
+| `test.csv` | Unlabeled reviews used for generating predictions |
+| `movies.csv` | Movie metadata including audienceScore, genre, runtimeMinutes, rating, boxOffice, and more |
+
+---
+
+## Project Structure
+
+Sentiment_Analysis/
+├── movies.csv
+├── train.csv
+├── test.csv
+└── sentiment_analysis_code.ipynb
+
 ---
 
 ## Setup
